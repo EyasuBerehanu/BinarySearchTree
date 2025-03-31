@@ -22,6 +22,7 @@ void printTree(Node* root, int depth);
 void filess(Node*& root, int& size);
 Node* remove(Node* root, int value);
 Node* getSuccessor(Node* cur); 
+Node* search(Node* root, int value);
 
 Node* insert(Node* root, int value) {
     if (root == nullptr) {
@@ -38,39 +39,62 @@ Node* insert(Node* root, int value) {
 }
 
 Node* getSuccessor(Node* cur) {
+    if (cur == nullptr || cur->right == nullptr){
+       return nullptr; 
+    } 
     cur = cur->right;
-    while (cur != nullptr && cur->left != nullptr) {
+    while (cur->left != nullptr) {
         cur = cur->left;
     }
     return cur;
 }
 
 Node* remove(Node* root, int value) {
-    if (root == nullptr){
+    if (root == nullptr) {
         return nullptr;
     }
+
     if (value < root->data) {
         root->left = remove(root->left, value);
     } else if (value > root->data) {
         root->right = remove(root->right, value);
     } else {
-        if (root->left == nullptr) {
+        if (root->left == nullptr && root->right == nullptr) {
+            delete root;
+            return nullptr;
+        }
+        else if (root->left == nullptr) {
             Node* temp = root->right;
             delete root;
             return temp;
-        } else if (root->right == nullptr) {
+        }
+        else if (root->right == nullptr) {
             Node* temp = root->left;
             delete root;
             return temp;
-        } else {
+        }
+        else {
             Node* successor = getSuccessor(root);
-            root->data = successor->data;
-            root->right = remove(root->right, successor->data);
+        if (successor != nullptr) {  
+                root->data = successor->data;
+                root->right = remove(root->right, successor->data);
+            }
         }
     }
     return root;
 }
 
+Node* search(Node* root, int value) {
+    if (root == nullptr || root->data == value) {
+        return root;
+    }
+
+    if (value > root->data) {
+        return search(root->right, value);
+    }
+
+    return search(root->left, value);
+}
 
 void printTree(Node* root, int depth = 0) {
     if (root == nullptr){
@@ -121,10 +145,10 @@ int main() {
             }
         }
     }
-
+    printTree(root);
     while (true) {
         cout << " " << endl;
-        printTree(root);
+        
         cout << " " << endl;
         cout << "Type I to insert a number" << endl;
         cout << "Type R to remove a number" << endl;
@@ -140,11 +164,25 @@ int main() {
             cin >> value;
             if (value >= 1 && value <= 999) {
                 root = insert(root, value);
+                printTree(root);
             }
         } else if (strcmp(input, "R") == 0) {
             cout << "Enter number to remove: ";
             cin >> value;
             root = remove(root, value);
+            printTree(root);
+        } else if (strcmp(input, "S") == 0) {
+            cout << "Enter number to search for ";
+            cin >> value;
+            
+            Node* result = search(root, value);
+            if (result != nullptr) {
+                printTree(root);
+                cout << value << " is in the tree" << endl;
+            } else {
+                printTree(root);
+                cout << value << " is not in the tree" << endl;
+            } 
         } else {
             break;
         }

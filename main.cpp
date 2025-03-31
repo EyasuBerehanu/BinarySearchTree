@@ -20,6 +20,8 @@ struct Node {
 Node* insert(Node* root, int value);
 void printTree(Node* root, int depth);
 void filess(Node*& root, int& size);
+Node* remove(Node* root, int value);
+Node* getSuccessor(Node* cur); 
 
 Node* insert(Node* root, int value) {
     if (root == nullptr) {
@@ -34,6 +36,41 @@ Node* insert(Node* root, int value) {
 
     return root;
 }
+
+Node* getSuccessor(Node* cur) {
+    cur = cur->right;
+    while (cur != nullptr && cur->left != nullptr) {
+        cur = cur->left;
+    }
+    return cur;
+}
+
+Node* remove(Node* root, int value) {
+    if (root == nullptr){
+        return nullptr;
+    }
+    if (value < root->data) {
+        root->left = remove(root->left, value);
+    } else if (value > root->data) {
+        root->right = remove(root->right, value);
+    } else {
+        if (root->left == nullptr) {
+            Node* temp = root->right;
+            delete root;
+            return temp;
+        } else if (root->right == nullptr) {
+            Node* temp = root->left;
+            delete root;
+            return temp;
+        } else {
+            Node* successor = getSuccessor(root);
+            root->data = successor->data;
+            root->right = remove(root->right, successor->data);
+        }
+    }
+    return root;
+}
+
 
 void printTree(Node* root, int depth = 0) {
     if (root == nullptr){
@@ -50,10 +87,6 @@ void printTree(Node* root, int depth = 0) {
 
 void filess(Node*& root) {
     ifstream file("numbers.txt");
-    if (!file) {
-        cout << "Error: Could not open file." << endl;
-        return;
-    }
     int value;
     while (file >> value) {
         if (value >= 1 && value <= 999) {
@@ -108,6 +141,10 @@ int main() {
             if (value >= 1 && value <= 999) {
                 root = insert(root, value);
             }
+        } else if (strcmp(input, "R") == 0) {
+            cout << "Enter number to remove: ";
+            cin >> value;
+            root = remove(root, value);
         } else {
             break;
         }
